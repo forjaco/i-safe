@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: isafe_web
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "8000"
+    networks:
+      - backend-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  celery_worker:
+    build: .
+    container_name: isafe_celery
+    command: celery -A app.core.celery_app worker --loglevel=info
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - backend-network
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: isafe_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: isafe
+      # Dev/local placeholder only. Set DB_PASSWORD explicitly before any public or production deployment.
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
+      POSTGRES_DB: isafe_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U isafe -d isafe_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: isafe_redis
+    restart: always
+    # Dev/local placeholder only. Set REDIS_PASSWORD explicitly before any public or production deployment.
+    command: redis-server --requirepass ${REDIS_PASSWORD:-change-me-in-production}
+    networks:
+      - backend-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: isafe_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - backend-network
+    depends_on:
+      - web
+
+  # Serviço finto/container fantasma auto-renovador do Lets Encrypt
+  certbot:
+    image: certbot/certbot
+    container_name: isafe_certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+networks:
+  # Isolamento de rede: Bancos e filas fechados do acesso web root 
+  backend-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

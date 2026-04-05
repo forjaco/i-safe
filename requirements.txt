@@ -1,0 +1,14 @@
+fastapi[standard]>=0.109.2
+pydantic>=2.6.1
+pydantic-settings>=2.2.1
+python-jose[cryptography]>=3.3.0
+passlib[argon2]>=1.7.4
+python-multipart>=0.0.9
+cryptography>=42.0.2
+httpx>=0.27.0
+email-validator>=2.1.0 # Necessário para rodar EmailStr do Pydantic (RFC 5322)
+pillow>=10.2.0 # Processamento de imagens e defesas contra RCE/validação Exif
+SQLAlchemy>=2.0.0 # ORM principal assíncrono
+aiosqlite>=0.20.0 # Driver nativo async para engatar no SQL Local da Máquina
+asyncpg>=0.29.0 # Driver async recomendado para PostgreSQL em produção
+psycopg[binary]>=3.1.18 # Driver sync para migrations e storage persistente de auth

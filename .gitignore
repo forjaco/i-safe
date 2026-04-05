@@ -1,0 +1,86 @@
+# ======================================================================
+# PROJECT AEGIS - REGRAS GLOBAIS DE SEGURANÇA E CACHE (GITIGNORE)
+# Construído sob arquitetura DevSecOps - Bloqueio Default-Deny
+# ======================================================================
+
+# ----------------------------------------------------------------------
+# 1. SEGREGAMENTO DE CREDENCIAIS (CRÍTICO)
+# ----------------------------------------------------------------------
+# POR QUE BLOQUEAR? O arquivo .env empacota todo o seu "Nível de Acesso"
+# de produção (Chaves Criptográficas AES, Master Secrets do JWT, Tokens
+# Nativos de Autenticação). Se for comitado (git push), os 'Scraper Bots' 
+# automatizados rasparão sua chave no GitHub em menos de 1 segundo, 
+# assumindo controle total do projeto. Esta é a regra cardinal DevSecOps.
+.env
+.env.*
+!.env.example # Salvo-conduto de Template Padrão de Higiene Permitido
+!frontend/.env.example
+
+# ----------------------------------------------------------------------
+# 2. BANCOS DE DADOS E ESTADOS LOCAIS
+# ----------------------------------------------------------------------
+# POR QUE BLOQUEAR? Arquivos como o nosso 'aegis.db' mantêm o dado real 
+# sensível das tabelas e logs. Se eles vazarem pro Repositório de Nuvem,
+# as vítimas do relatório OSINT estariam entregues de bandeja num arquivo 
+# SQLite facilmente baixável. Versionar `.db` ou Binários gigantes também
+# destroem a agilidade da árvore Git (Diffing).
+*.sqlite
+*.sqlite3
+aegis.db
+*.db
+*.db-journal
+
+# ----------------------------------------------------------------------
+# 3. PASTAS DO PYTHON CORE E AMBIENTES (VENVS)
+# ----------------------------------------------------------------------
+# Bibliotecas instaladas em seu Windows via PyPi (Environments) ficam em pastas 
+# ultra-pesadas ou despejam bytes dinâmicos compilados que variam pro seu SO.
+# Jamais devem seguir pro repo (usamos o requirements.txt pra resolver isso no Build).
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.venv-clean/
+env/
+.env_win/
+.pytest_cache/
+.coverage
+
+# ----------------------------------------------------------------------
+# 4. LOGS (A04 - DATA VULNERABILITY MITIGATION)
+# ----------------------------------------------------------------------
+# Arquivos de log de Exception podem cuspir no arquivo de texto um Request
+# completo incluindo Cabeçalhos de Senha de um usuário na hora do "Crash".
+# Bloquear logs é mitigar A04-Next Gen Logging Failure acidental.
+*.log
+logs/
+
+# ----------------------------------------------------------------------
+# 5. METADATAS DOS DEPLOYMENTS DOCKER
+# ----------------------------------------------------------------------
+.docker/
+docker-compose.override.yml
+
+# ----------------------------------------------------------------------
+# 6. IDEs e SISTEMAS OPERACIONAIS
+# ----------------------------------------------------------------------
+# Lixo algorítmico do Sistema de Janelas 
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Ferramentas IDE Configs (Evita briga de tabs/espacos das maquinas de programadores)
+.vscode/
+.idea/
+
+# ----------------------------------------------------------------------
+# 7. FRONTEND COMPILE (NODE.JS) E CACHES
+# ----------------------------------------------------------------------
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+node_modules/
+dist/
+build/
+.npm/
