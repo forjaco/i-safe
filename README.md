@@ -1,117 +1,113 @@
+cat << 'EOF' > README.md
 # I-safe
 
-**I-safe** is an open-source, self-hosted, local-first digital hygiene platform focused on exposure awareness, privacy analysis, and secure remediation guidance.
+I-safe is an open-source, self-hosted digital hygiene platform focused on exposure awareness, privacy analysis, and security-first design.
 
-It was designed to help users understand their digital exposure, inspect privacy risks in uploaded images, and interact with a security-first interface that favors safe defaults, anti-abuse controls, and transparent architecture.
-
-## Core focus
+## Features
 
 - Email exposure lookup
-- Phone lookup in controlled mock mode
-- Image privacy analysis (EXIF / metadata risk)
-- Risk scoring and remediation guidance
-- Secure authentication with rotation and reuse detection
-- Local-first and self-hosted operation
+- Phone lookup (controlled mock mode)
+- Image privacy analysis (EXIF / metadata)
+- Risk scoring and recommendations
+- Secure authentication with refresh token rotation
+- Abuse protection and rate limiting
+- i18n support (pt-BR, en, es)
 
-## Current status
+## Current Status
 
-### Real / implemented
-- Authentication:
-  - Login
-  - Refresh
-  - Logout
-  - Authenticated user endpoint (`/api/v1/auth/me`)
-- Refresh token rotation
-- Refresh token revocation
-- Refresh token reuse attack detection
+### Implemented
+- Authentication (login, refresh, logout, /auth/me)
 - Email lookup
-- Image upload and privacy analysis
-- Risk score calculation
-- Actionable recommendations
-- Anonymous restricted response mode
-- Abuse protection / rate limiting
-- Frontend integrated with backend
-- i18n support:
-  - Portuguese (pt-BR)
-  - English (en)
-  - Spanish (es)
+- Image upload and analysis
+- Risk score and recommendations
+- Anti-abuse protections
 
-### Controlled mock
-- Phone lookup  
-  Currently available as a **controlled mock flow** or disabled, depending on configuration.  
-  It should **not** be presented as a real intelligence provider in production.
+### Mock / Controlled
+- Phone lookup (not a real provider yet)
 
-### Roadmap / coming soon
-- Public image sanitization endpoint
-- Encrypted vault
+### Roadmap
+- Image sanitization
+- Vault
 - Domain monitoring
-- Digital hygiene report generation
+- Hygiene report export
 
-## Security posture
+## Security
 
-I-safe was built with security as a first-class concern.
-
-### Security-related features
 - Argon2 password hashing
-- JWT access + refresh token model
-- Refresh rotation
-- Reuse attack detection
-- HttpOnly refresh cookie
-- Access token stored only in memory on the frontend
-- Structured logging without PII
-- Request correlation (`request_id`)
-- Restricted responses to reduce abuse value
-- Rate limiting on OSINT and authentication flows
-- Input validation for email and phone
-- Safe image validation for:
-  - empty files
-  - oversized files
-  - truncated files
-  - mimetype mismatch
-  - metadata / EXIF / GPS detection
-
-### Abuse-aware design
-This project is positioned as a **self-check / digital hygiene** platform.
-
-It is **not** intended to support profiling, doxing, or offensive enumeration of third-party targets.
-
-Some risk remains inherent to exposure lookup systems, so production deployments should use:
-- strong reverse proxy / gateway enforcement
-- distributed rate limiting
-- robust logging and monitoring
-- explicit environment configuration
+- JWT access + refresh tokens
+- Refresh rotation and reuse detection
+- HttpOnly cookies
+- No PII in logs
+- Input validation and safe image handling
 
 ## Architecture
 
-Backend follows a Clean Architecture-inspired structure:
+- Clean Architecture
+- FastAPI backend
+- React + Vite frontend
 
-- `app/core/` → configuration, security, abuse prevention, middleware, errors
-- `app/application/` → use cases, entities, ports
-- `app/infrastructure/` → repositories, database adapters, external integrations
-- `app/presentation/` → FastAPI routes
-- `frontend/` → React + Vite frontend
-
-## Stack
+## Setup
 
 ### Backend
-- Python
-- FastAPI
-- SQLAlchemy 2.0
-- Alembic
-- Argon2
-- JWT
-- AES-GCM
-- Pillow
+
+cp .env.example .env
+
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+venv/bin/python scripts/seed_demo_user.py
+
+venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001
 
 ### Frontend
-- React 18
-- Vite
-- Axios
 
-## Local development
+cp frontend/.env.example frontend/.env
 
-### 1. Backend environment
-Create local env from example:
+cd frontend
+npm install
+npm run dev
 
-```bash
-cp .env.example .env
+Frontend:
+http://localhost:5173
+
+## Demo Credentials
+
+Email: demo@isafe.local  
+Password: DemoPass123!
+
+(Local development only)
+
+## Tests
+
+venv/bin/pytest -q
+
+## Limitations
+
+- Phone lookup is mock
+- SQLite async has runtime limitations
+- Rate limit is in-memory (dev oriented)
+
+## Production Notes
+
+- Use PostgreSQL
+- Use real secrets outside repo
+- Enable secure cookies
+- Use gateway rate limiting
+
+## License
+
+MIT License
+
+## Disclaimer
+
+I-safe is intended for defensive, privacy-oriented, and self-assessment use cases.
+
+Do not use it to:
+- profile individuals
+- target third parties
+- violate privacy or legal boundaries
+
+EOF
