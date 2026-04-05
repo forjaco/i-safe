@@ -84,3 +84,4 @@ node_modules/
 dist/
 build/
 .npm/
+.codex
